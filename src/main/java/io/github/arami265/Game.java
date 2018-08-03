@@ -28,7 +28,7 @@ public class Game implements Runnable
 
     //Creates variables for game
     //Board can be different sizes
-    int tileDimension = 25;
+    int tileDimension = 30;
     int colNum = 30;
     int rowNum = 10;
     int boardWidth = (tileDimension * colNum) + colNum - 1;
@@ -115,7 +115,7 @@ public class Game implements Runnable
             //and the array is affected
             else
             {
-                int clickedTileX = clickX / 26, clickedTileY = clickY / 26;
+                int clickedTileX = clickX / (tileDimension + 1), clickedTileY = clickY / (tileDimension + 1);
 
                 if(!hasBeenClicked[clickedTileY][clickedTileX])
                     hasBeenClicked[clickedTileY][clickedTileX] = true;
@@ -216,7 +216,7 @@ public class Game implements Runnable
                 else
                     g.setColor(Color.BLACK);
 
-                g.fillRect(boardXOffset + (i * tileDimension) + i, boardYOffset + (i0 * tileDimension) + i0, 25, 25);
+                g.fillRect(boardXOffset + (i * tileDimension) + i, boardYOffset + (i0 * tileDimension) + i0, tileDimension, tileDimension);
             }
         }
 
