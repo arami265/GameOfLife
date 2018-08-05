@@ -1,9 +1,14 @@
 /**
- * Hello world!
+ * Conway's Game of Life [under construction]
  * Author: Arnold Ramirez
  *
- * Runs Conway's Game of Life
- * [under construction]
+ * More info in readme
+ *
+ *
+ * Right now the simulation starts on mouse click.
+ * More features to be added.
+ *
+ * Variables like tileDimension and timeToWait will change simulation.
  **/
 
 package io.github.arami265;
@@ -11,6 +16,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
+import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -19,8 +25,9 @@ import javax.swing.JPanel;
 public class Game implements Runnable
 {
 
-    final int WIDTH = 1000;
-    final int HEIGHT = 700;
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    final int WIDTH = (int)screenSize.getWidth() + 1;
+    final int HEIGHT = (int)screenSize.getHeight() - 22;
 
     JFrame frame;
     Canvas canvas;
@@ -28,20 +35,32 @@ public class Game implements Runnable
 
     //Creates variables for game
     //Board can be different sizes
-    int tileDimension = 30;
-    int colNum = 30;
-    int rowNum = 10;
-    int boardWidth = (tileDimension * colNum) + colNum - 1;
-    int boardHeight = (tileDimension * rowNum) + rowNum - 1;
+    final int tileDimension = 4;
+    final int borderWidth = 0;
 
-    int boardXOffset = (WIDTH / 2) - (boardWidth / 2);
-    int boardYOffset = (HEIGHT / 2) - (boardHeight / 2);
+    //Figure out how many tiles can fit on the screen
+    final int margin = 20;
 
-    boolean hasBeenClicked[][] = new boolean[rowNum][colNum];
+    final int numOfColumns = (WIDTH - margin) / (tileDimension + borderWidth);
+    final int numOfRows = (HEIGHT - margin) / (tileDimension + borderWidth);
 
-    boolean startGame = false, hasRun = false;
 
-    public Game(){
+    final int boardWidth = (tileDimension * numOfColumns) + (numOfColumns - 1) * borderWidth;
+    final int boardHeight = (tileDimension * numOfRows) + (numOfRows - 1) * borderWidth;
+
+    final int boardXOffset = (WIDTH / 2) - (boardWidth / 2);
+    final int boardYOffset = (HEIGHT / 2) - (boardHeight / 2);
+
+    //boolean isAlive[][] = new boolean[numOfRows][numOfColumns];
+    public Tile tiles[][] = new Tile[numOfRows][numOfColumns];
+    BoardHelper boardHelper = new BoardHelper();
+
+    boolean isRunning = false, hasRun = false;
+    Random rand = new Random();
+    double percentFilled = .2;
+
+    public Game()
+    {
         frame = new JFrame("Conway's Game of Life");
 
         JPanel panel = (JPanel) frame.getContentPane();
@@ -56,7 +75,8 @@ public class Game implements Runnable
 
         canvas.addMouseListener(new MouseControl());
 
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.pack();
         frame.setResizable(false);
         frame.setVisible(true);
@@ -66,61 +86,94 @@ public class Game implements Runnable
 
         canvas.requestFocus();
 
-        //Initializes array that keeps track of clicked tiles
-        for(int i = 0; i < colNum; i++)
+        //Initializes array of tiles
+        for(int i = 0; i < numOfColumns; i++)
         {
-            for(int i0 = 0; i0 < rowNum; i0++)
+            for(int i0 = 0; i0 < numOfRows; i0++)
             {
-                hasBeenClicked[i0][i] = false;
+                tiles[i0][i] = new Tile();
+                if((rand.nextFloat()) < percentFilled)
+                {
+                    tiles[i0][i].setAlive(true);
+                }
             }
         }
-    }
 
+        boardHelper.setNeighbors(tiles, numOfColumns, numOfRows);
+    }
 
     private class MouseControl extends MouseAdapter{
         public void mousePressed(MouseEvent me)
         {
-            //This commented code flags that the game
-            //has started running. In update() you can
-            //see some animation that starts and stops
-            //with this mouse click.
-            /*if(!startGame)
-                startGame = true;
+            //int clickX = me.getX(), clickY = me.getY();
+
+            if(!isRunning)
+                isRunning = true;
             else
-                startGame = false;*/
+                isRunning = false;
 
-            int clickX = me.getX(), clickY = me.getY();
-            //Clicks are put into the context of the board for now
-            //TODO: Add menu buttons and handle them here as well
-            clickX -= boardXOffset;
-            clickY -= boardYOffset;
+            if(isRunning)
+            {
+                //Ignore board clicks
+                /*if(boardHelper.boardWasClicked(clickX, clickY,boardXOffset,boardWidth,boardYOffset,boardHeight))
+                {
+                    //Nothing.
+                }
 
-            //These variables are for determining whether a
-            //border between tiles is clicked
-            int checkX = clickX - tileDimension, checkY = clickY - tileDimension;
-
-            if(clickX < 0 || clickX > boardWidth || clickY < 0 || clickY > boardHeight)
-            {
-                //If the click is outside the border, nothing happens
-            }
-            else if(checkX % (tileDimension + 1) == 0)
-            {
-                //Nothing. A border has been reached
-            }
-            else if(checkY % (tileDimension + 1) == 0)
-            {
-                //Nothing. A border has been reached
-            }
-            //Otherwise, a tile has been clicked
-            //and the array is affected
-            else
-            {
-                int clickedTileX = clickX / (tileDimension + 1), clickedTileY = clickY / (tileDimension + 1);
-
-                if(!hasBeenClicked[clickedTileY][clickedTileX])
-                    hasBeenClicked[clickedTileY][clickedTileX] = true;
+                //Switch game state on click outside of board
+                //TODO: Add menu buttons and handle them here as well
                 else
-                    hasBeenClicked[clickedTileY][clickedTileX] = false;
+                {
+                    if(!isRunning)
+                        isRunning = true;
+                    else
+                        isRunning = false;
+                }*/
+            }
+            //If the game is not running
+            else
+            {
+                //Board clicks are registered as setting tiles
+                /*if(boardHelper.boardWasClicked(clickX, clickY,boardXOffset,boardWidth,boardYOffset,boardHeight))
+                {
+                    //Puts click into context of board instead of total canvas size
+
+                    int clickXBoard = clickX - boardXOffset;
+                    int clickYBoard = clickY - boardYOffset;
+
+                    //These variables are for determining whether a
+                    //border between tiles is clicked
+                    int checkX = clickXBoard - tileDimension, checkY = clickYBoard - tileDimension;
+
+                    if(clickXBoard < 0 || clickXBoard > boardWidth || clickYBoard < 0 || clickYBoard > boardHeight)
+                    {
+                        //If the click is outside the border, nothing happens
+                    }
+                    else if(boardHelper.borderWasClicked(checkX, checkY, borderWidth, tileDimension))
+                    {
+                        //Nothing. A border has been reached
+                    }
+
+                    //Otherwise, a tile has been clicked
+                    //and the array is affected
+                    else
+                    {
+                        int clickedTileX = clickXBoard / (tileDimension + borderWidth), clickedTileY = clickYBoard / (tileDimension + borderWidth);
+
+                        if(!tiles[clickedTileY][clickedTileX].isAlive)
+                            tiles[clickedTileY][clickedTileX].setAlive(true);
+                        else
+                            tiles[clickedTileY][clickedTileX].setAlive(false);
+                    }
+                }
+                //If the board is not clicked, the game state changes
+                else
+                {
+                    if(!isRunning)
+                        isRunning = true;
+                    else
+                        isRunning = false;
+                }*/
             }
         }
     }
@@ -175,52 +228,62 @@ public class Game implements Runnable
     private double x = boardXOffset, y = boardYOffset;
     int deltaCount = 0;
 
+    int genCount = 1;
+    //Time to wait is in ms
+    int timeToWait = 100;
 
     protected void update(int deltaTime)
     {
-        //This code makes a colored tile move across
-        //every row in a loop when tapped, pausing when
-        //tapped.
-        //TODO:Replace this trivial animation with the rules for Conway's Game of Life
-        /*if(startGame)
+        if(isRunning)
         {
             deltaCount += deltaTime;
-            if (deltaCount >= 100)
+            if (deltaCount >= timeToWait)
             {
-                x += tileDimension + 1;
-                if (x - boardXOffset > boardWidth - tileDimension)
-                {
-                    x = boardXOffset;
 
-                    y += tileDimension + 1;
-                    if (y - boardYOffset > boardHeight - tileDimension)
-                    {
-                        y = boardYOffset;
-                    }
-                }
+                boardHelper.updateBoardState(tiles, numOfColumns, numOfRows);
+                genCount++;
+
                 deltaCount = 0;
             }
-        }*/
+        }
     }
 
-    //For now just draws a grid of tiles,
-    //which change color when clicked
     protected void render(Graphics2D g){
 
-        for(int i = 0; i < colNum; i++)
+        if(isRunning)
         {
-            for(int i0 = 0; i0 < rowNum; i0++)
-            {
-                if(hasBeenClicked[i0][i])
-                    g.setColor(Color.CYAN);
-                else
-                    g.setColor(Color.BLACK);
+            g.setColor(new Color(14, 199, 178));
+            g.fillRect(0,0,WIDTH,HEIGHT);
+           // g.setColor(new Color(36, 71, 67));
+            //g.drawString("Generation: " + genCount, boardXOffset, 24);
 
-                g.fillRect(boardXOffset + (i * tileDimension) + i, boardYOffset + (i0 * tileDimension) + i0, tileDimension, tileDimension);
+            //Count neighbors
+        }
+        else
+        {
+            g.setColor(new Color(36, 71, 67));
+            g.fillRect(0,0,WIDTH,HEIGHT);
+            //g.setColor(new Color(14, 199, 178));
+            //g.drawString("Generation: " + genCount, boardXOffset, 24);
+        }
+
+        for(int col = 0; col < numOfColumns; col++)
+        {
+            for(int row = 0; row < numOfRows; row++)
+            {
+                if(tiles[row][col].isUpdated() && isRunning)
+                    tiles[row][col].setAlive(tiles[row][col].willSurvive());
+
+                if(tiles[row][col].isAlive())
+                    g.setColor(new Color(14, 199, 178));
+                else
+                    g.setColor(new Color(76, 152, 153));
+
+                g.fillRect(boardXOffset + (col * tileDimension) + (col * borderWidth), boardYOffset + (row * tileDimension) + (row * borderWidth), tileDimension, tileDimension);
             }
         }
 
-        //This code fills one tile with cyan to fulfill animation
+        //This code fills one tiles with cyan to fulfill animation
         /*if(hasRun)
         {
             g.setColor(Color.CYAN);
