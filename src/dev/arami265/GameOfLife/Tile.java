@@ -1,6 +1,7 @@
-package io.github.arami265;
+package dev.arami265.GameOfLife;
 
-public class Tile {
+public class Tile
+{
     boolean isAlive;
     boolean willSurvive;
     Tile nw, n, ne, w, e, sw, s, se;

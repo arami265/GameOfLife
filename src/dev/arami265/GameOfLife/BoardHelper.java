@@ -1,6 +1,7 @@
-package io.github.arami265;
+package dev.arami265.GameOfLife;
 
-public class BoardHelper {
+public class BoardHelper
+{
     public boolean boardWasClicked(int clickX, int clickY, int boardXOffset, int boardWidth, int boardYOffset, int boardHeight)
     {
         if((clickX >= boardXOffset && clickX < (boardXOffset + boardWidth)) && (clickY >= boardYOffset && clickY < (boardYOffset + boardHeight)))
