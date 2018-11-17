@@ -145,7 +145,7 @@ public class GameOfLife implements Runnable {
         g.dispose();
     }
 
-    @Override
+    //@Override
     public void run()
     {
         init();

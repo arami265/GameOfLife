@@ -1,7 +1,5 @@
 package dev.arami265.GameOfLife;
 
-import dev.arami265.GameOfLife.Display.Display;
-
 public class Launcher {
 
     public static void main(String[] args)
