@@ -11,10 +11,14 @@ public class GameOfLife implements Runnable {
 
     private Display display;
 
+    double delta, simulationDelta;
+    int currentFPS;
+
     public int width, height;
     public String title;
 
-    public static boolean running = false;
+    public boolean running = false;
+    public static States state;
 
     private static Thread thread;
 
@@ -79,7 +83,7 @@ public class GameOfLife implements Runnable {
         boardHelper = new BoardHelper();
         hasRun = false;
         rand = new Random();
-        percentFilled = .13;
+        percentFilled = .1;
 
         //Initializes array of tiles
         for(int i = 0; i < numOfColumns; i++)
@@ -95,26 +99,24 @@ public class GameOfLife implements Runnable {
         }
 
         boardHelper.setNeighbors(tiles, numOfColumns, numOfRows);
+        state = States.PAUSE;
 
         display = new Display(title, width, height);
+
+        //Creates buffer
+        display.getCanvas().createBufferStrategy(3);
+        buffers = display.getCanvas().getBufferStrategy();
+        delta = 1;
     }
 
     //private double x = boardXOffset, y = boardYOffset;
     private void update()
     {
-        if(running)
-            boardHelper.updateBoardState(tiles, numOfColumns, numOfRows);
+        boardHelper.updateBoardState(tiles, numOfColumns, numOfRows);
     }
 
     private void render()
     {
-        buffers = display.getCanvas().getBufferStrategy();
-        if(buffers == null)
-        {
-            display.getCanvas().createBufferStrategy(3);
-            return;
-        }
-
         g = buffers.getDrawGraphics();
 
         //Clear screen
@@ -141,7 +143,6 @@ public class GameOfLife implements Runnable {
 
         buffers.show();
         g.dispose();
-
     }
 
     @Override
@@ -149,24 +150,31 @@ public class GameOfLife implements Runnable {
     {
         init();
 
-        int fps = 6;
-        double nanoSecPerUpdate = 1000000000 / fps, delta = 0;
+        double fps = 30, nanoSecPerFrame = 1000000000 / fps, updatesPerSec = 3, nanoSecPerUpdate = 1000000000 / updatesPerSec;
         long now, prevTime = System.nanoTime(), timer = 0;
-        int updates = 0;
 
-        while(true)
+        while(running)
         {
             now = System.nanoTime();
-            delta += (now - prevTime) / nanoSecPerUpdate;
+            delta += (now - prevTime) / nanoSecPerFrame;
+            simulationDelta += (now - prevTime) / nanoSecPerUpdate;
             timer += now - prevTime;
             prevTime = now;
 
-            if(delta >= 1)
+            if(delta >= 1 && state == States.PLAY && simulationDelta >= 1)
             {
                 update();
                 render();
 
-                updates++;
+                currentFPS++;
+
+                delta = 0;
+                simulationDelta = 0;
+            }
+            else if(delta >= 1)
+            {
+                render();
+                currentFPS++;
 
                 delta = 0;
             }
@@ -174,24 +182,25 @@ public class GameOfLife implements Runnable {
             //Timer lives here
             if(timer >= 1000000000)
             {
-                System.out.println("FPS: " + updates);
-                updates = 0;
+                System.out.println("FPS: " + currentFPS);
+                currentFPS = 0;
                 timer = 0;
             }
 
         }
 
-        //stop();
+        stop();
     }
 
     public synchronized void start()
     {
+        running = true;
 
         thread = new Thread(this);
         thread.start();
     }
 
-    /*public synchronized void stop()
+    public synchronized void stop()
     {
         if(running)
         {
@@ -203,20 +212,5 @@ public class GameOfLife implements Runnable {
                 e.printStackTrace();
             }
         }
-    }*/
-
-    public static boolean isRunning()
-    {
-        return running;
-    }
-
-    public void setRunning(boolean r)
-    {
-        running = r;
-    }
-
-    public static Thread getThread()
-    {
-        return thread;
     }
 }

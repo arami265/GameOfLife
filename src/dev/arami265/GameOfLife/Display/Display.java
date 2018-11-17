@@ -1,6 +1,7 @@
 package dev.arami265.GameOfLife.Display;
 
 import dev.arami265.GameOfLife.GameOfLife;
+import dev.arami265.GameOfLife.States;
 
 import javax.swing.JFrame;
 import java.awt.*;
@@ -51,19 +52,20 @@ public class Display {
         {
             //int clickX = me.getX(), clickY = me.getY();
 
-            if(!GameOfLife.isRunning())
-            {
-                GameOfLife.running = true;
-            }
+            if(GameOfLife.state == States.PAUSE)
+                GameOfLife.state = States.PLAY;
             else
-            {
-                GameOfLife.running = false;
-            }
+                GameOfLife.state = States.PAUSE;
         }
     }
 
     public Canvas getCanvas()
     {
         return canvas;
+    }
+
+    public Frame getFrame()
+    {
+        return frame;
     }
 }
