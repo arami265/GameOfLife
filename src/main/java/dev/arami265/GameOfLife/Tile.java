@@ -1,15 +1,13 @@
 package dev.arami265.GameOfLife;
 
-public class Tile
-{
+public class Tile {
     boolean isAlive;
     boolean willSurvive;
     Tile nw, n, ne, w, e, sw, s, se;
     String boardEdge;
     boolean updated;
 
-    public Tile()
-    {
+    public Tile() {
         isAlive = false;
         willSurvive = false;
         nw = null;

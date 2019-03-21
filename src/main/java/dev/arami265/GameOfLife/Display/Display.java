@@ -17,9 +17,7 @@ public class Display {
     private int width, height;
 
 
-
-    public Display(String title, int width, int height)
-    {
+    public Display(String title, int width, int height) {
         this.title = title;
         this.width = width;
         this.height = height;
@@ -27,8 +25,7 @@ public class Display {
         initDisplay();
     }
 
-    private void initDisplay()
-    {
+    private void initDisplay() {
         frame = new JFrame(title);
         frame.setSize(width, height);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -47,25 +44,22 @@ public class Display {
         frame.setVisible(true);
     }
 
-    private class MouseControl extends MouseAdapter{
-        public void mousePressed(MouseEvent me)
-        {
+    private class MouseControl extends MouseAdapter {
+        public void mousePressed(MouseEvent me) {
             //int clickX = me.getX(), clickY = me.getY();
 
-            if(GameOfLife.state == States.PAUSE)
+            if (GameOfLife.state == States.PAUSE)
                 GameOfLife.state = States.PLAY;
             else
                 GameOfLife.state = States.PAUSE;
         }
     }
 
-    public Canvas getCanvas()
-    {
+    public Canvas getCanvas() {
         return canvas;
     }
 
-    public Frame getFrame()
-    {
+    public Frame getFrame() {
         return frame;
     }
 }
