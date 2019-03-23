@@ -9,15 +9,13 @@ import java.util.Random;
 
 public class GameOfLife implements Runnable {
 
-    private Display display;
+    private double delta, simulationDelta;
+    private int currentFPS;
 
-    double delta, simulationDelta;
-    int currentFPS;
+    private int displayWidth, displayHeight;
+    private String title;
 
-    public int width, height;
-    public String title;
-
-    public boolean running = false;
+    private boolean running = false;
     public static States state;
 
     private static Thread thread;
@@ -27,67 +25,57 @@ public class GameOfLife implements Runnable {
 
     //Creates variables for game
     //Board can be different sizes
-    int tileDimension;
-    int borderWidth;
+    private int tileDimension;
+    private int tileBorderWidth;
 
-    //Figure out how many tiles can fit on the screen
-    int margin;
-
-    int numOfColumns;
-    int numOfRows;
+    private int numOfColumns;
+    private int numOfRows;
 
 
-    int boardWidth;
-    int boardHeight;
-
-    int boardXOffset;
-    int boardYOffset;
+    private int boardXOffset;
+    private int boardYOffset;
 
     //boolean isAlive[][] = new boolean[numOfRows][numOfColumns];
-    public Tile tiles[][];
-    BoardHelper boardHelper;
+    private Tile[][] tiles;
+    private BoardHelper boardHelper;
 
-    boolean hasRun;
-    Random rand;
-    double percentFilled;
+    // private boolean hasRun;
 
-    public GameOfLife(String title, int width, int height) {
+    public GameOfLife(String title) {
         this.title = title;
-        this.width = width;
-        this.height = height;
     }
 
     private void init() {
-        //Figure out how many tiles can fit on the screen:
-        //
-        //Creates variables for game; board can be different sizes
-        tileDimension = 5;
-        borderWidth = 0;
+        displayWidth = Config.displayWidth;
+        displayHeight = Config.displayHeight;
 
-        margin = 0;
+        tileDimension = Config.tileDimension;
+        tileBorderWidth = Config.tileBorderWidth;
+        //Figure out how many tiles can fit on the screen
+        int boardMargin = Config.boardMargin;
 
-        numOfColumns = (width - margin) / (tileDimension + borderWidth);
-        numOfRows = (height - margin) / (tileDimension + borderWidth);
+        // The following lines determine exactly what pixels in the window will be rendered to for the board
+        numOfColumns = (displayWidth - boardMargin) / (tileDimension + tileBorderWidth);
+        numOfRows = (displayHeight - boardMargin) / (tileDimension + tileBorderWidth);
 
+        int boardWidth = (tileDimension * numOfColumns) + (numOfColumns - 1) * tileBorderWidth;
+        int boardHeight = (tileDimension * numOfRows) + (numOfRows - 1) * tileBorderWidth;
 
-        boardWidth = (tileDimension * numOfColumns) + (numOfColumns - 1) * borderWidth;
-        boardHeight = (tileDimension * numOfRows) + (numOfRows - 1) * borderWidth;
-
-        boardXOffset = (width / 2) - (boardWidth / 2);
-        boardYOffset = (height / 2) - (boardHeight / 2);
+        boardXOffset = (displayWidth / 2) - (boardWidth / 2);
+        boardYOffset = (displayHeight / 2) - (boardHeight / 2);
 
         //boolean isAlive[][] = new boolean[numOfRows][numOfColumns];
         tiles = new Tile[numOfRows][numOfColumns];
         boardHelper = new BoardHelper();
-        hasRun = false;
-        rand = new Random();
-        percentFilled = .1;
+        // hasRun = false;
+        Random rand = new Random();
+        double amountFilled = Config.amountFilled;
 
         //Initializes array of tiles
         for (int i = 0; i < numOfColumns; i++) {
             for (int i0 = 0; i0 < numOfRows; i0++) {
                 tiles[i0][i] = new Tile();
-                if ((rand.nextFloat()) < percentFilled) {
+                if ((rand.nextFloat()) < amountFilled) {
                     tiles[i0][i].setAlive(true);
                 }
             }
@@ -96,7 +84,7 @@ public class GameOfLife implements Runnable {
         boardHelper.setNeighbors(tiles, numOfColumns, numOfRows);
         state = States.PAUSE;
 
-        display = new Display(title, width, height);
+        Display display = new Display(title, displayWidth, displayHeight);
 
         //Creates buffer
         display.getCanvas().createBufferStrategy(3);
@@ -113,21 +101,22 @@ public class GameOfLife implements Runnable {
         g = buffers.getDrawGraphics();
 
         //Clear screen
-        g.clearRect(0, 0, width, height);
+        g.clearRect(0, 0, displayWidth, displayHeight);
         //Draw start
 
+        //Draws the tiles
         for (int col = 0; col < numOfColumns; col++) {
             for (int row = 0; row < numOfRows; row++) {
                 if (tiles[row][col].isUpdated())
                     tiles[row][col].setAlive(tiles[row][col].willSurvive());
 
                 if (tiles[row][col].isAlive())
-                    g.setColor(new Color(14, 199, 178));
+                    g.setColor(Config.tileColor);
                 else
                     //g.setColor(new Color(76, 152, 153));
-                    g.setColor(Color.DARK_GRAY);
+                    g.setColor(Config.boardColor);
 
-                g.fillRect(boardXOffset + (col * tileDimension) + (col * borderWidth), boardYOffset + (row * tileDimension) + (row * borderWidth), tileDimension, tileDimension);
+                g.fillRect(boardXOffset + (col * tileDimension) + (col * tileBorderWidth), boardYOffset + (row * tileDimension) + (row * tileBorderWidth), tileDimension, tileDimension);
             }
         }
         //Draw end
@@ -140,7 +129,7 @@ public class GameOfLife implements Runnable {
     public void run() {
         init();
 
-        double fps = 30, nanoSecPerFrame = 1000000000 / fps, updatesPerSec = 3, nanoSecPerUpdate = 1000000000 / updatesPerSec;
+        double fps = Config.fps, nanoSecPerFrame = 1000000000 / fps, updatesPerSec = Config.updatesPerSec, nanoSecPerUpdate = 1000000000 / updatesPerSec;
         long now, prevTime = System.nanoTime(), timer = 0;
 
         while (running) {
@@ -177,14 +166,14 @@ public class GameOfLife implements Runnable {
         stop();
     }
 
-    public synchronized void start() {
+    synchronized void start() {
         running = true;
 
         thread = new Thread(this);
         thread.start();
     }
 
-    public synchronized void stop() {
+    private synchronized void stop() {
         if (running) {
             running = false;
 

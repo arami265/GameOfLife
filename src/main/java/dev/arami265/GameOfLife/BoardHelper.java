@@ -2,10 +2,7 @@ package dev.arami265.GameOfLife;
 
 public class BoardHelper {
     public boolean boardWasClicked(int clickX, int clickY, int boardXOffset, int boardWidth, int boardYOffset, int boardHeight) {
-        if ((clickX >= boardXOffset && clickX < (boardXOffset + boardWidth)) && (clickY >= boardYOffset && clickY < (boardYOffset + boardHeight)))
-            return true;
-        else
-            return false;
+        return (clickX >= boardXOffset && clickX < (boardXOffset + boardWidth)) && (clickY >= boardYOffset && clickY < (boardYOffset + boardHeight));
     }
 
     public boolean borderWasClicked(int checkX, int checkY, int borderWidth, int tileDimension) {
@@ -19,7 +16,7 @@ public class BoardHelper {
         return false;
     }
 
-    public void setNeighbors(Tile[][] tiles, int numOfColumns, int numOfRows) {
+    void setNeighbors(Tile[][] tiles, int numOfColumns, int numOfRows) {
         //Check neighbors for every tile
         for (int col = 0; col < numOfColumns; col++) {
             for (int row = 0; row < numOfRows; row++) {
@@ -98,7 +95,7 @@ public class BoardHelper {
         }
     }
 
-    public void updateBoardState(Tile[][] tiles, int numOfColumns, int numOfRows) {
+    void updateBoardState(Tile[][] tiles, int numOfColumns, int numOfRows) {
         boolean boardHasChanged = false;
         int liveNeighbors;
 
@@ -216,7 +213,7 @@ public class BoardHelper {
                     } else if (liveNeighbors == 2 || liveNeighbors == 3) {
                         tiles[row][col].setWillSurvive(true);
                         tiles[row][col].setUpdated(false);
-                    } else if (liveNeighbors > 3) {
+                    } else {
                         tiles[row][col].setWillSurvive(false);
                         tiles[row][col].setUpdated(true);
                     }
@@ -232,31 +229,19 @@ public class BoardHelper {
         }
     }
 
-    public boolean isNorthEdge(int row) {
-        if (row == 0)
-            return true;
-        else
-            return false;
+    private boolean isNorthEdge(int row) {
+        return row == 0;
     }
 
-    public boolean isSouthEdge(int row, int numOfRows) {
-        if (row == (numOfRows - 1))
-            return true;
-        else
-            return false;
+    private boolean isSouthEdge(int row, int numOfRows) {
+        return row == (numOfRows - 1);
     }
 
-    public boolean isWestEdge(int col) {
-        if (col == 0)
-            return true;
-        else
-            return false;
+    private boolean isWestEdge(int col) {
+        return col == 0;
     }
 
-    public boolean isEastEdge(int col, int numOfColumns) {
-        if (col == (numOfColumns - 1))
-            return true;
-        else
-            return false;
+    private boolean isEastEdge(int col, int numOfColumns) {
+        return col == (numOfColumns - 1);
     }
 }

@@ -1,13 +1,13 @@
 package dev.arami265.GameOfLife;
 
-public class Tile {
-    boolean isAlive;
-    boolean willSurvive;
-    Tile nw, n, ne, w, e, sw, s, se;
-    String boardEdge;
-    boolean updated;
+class Tile {
+    private boolean isAlive;
+    private boolean willSurvive;
+    private Tile nw, n, ne, w, e, sw, s, se;
+    private String boardEdge;
+    private boolean updated;
 
-    public Tile() {
+    Tile() {
         isAlive = false;
         willSurvive = false;
         nw = null;
@@ -23,100 +23,100 @@ public class Tile {
     }
 
     //Getters
-    public boolean isAlive() {
+    boolean isAlive() {
         return isAlive;
     }
 
-    public boolean willSurvive() {
+    boolean willSurvive() {
         return willSurvive;
     }
 
-    public Tile getNw() {
+    Tile getNw() {
         return nw;
     }
 
-    public Tile getN() {
+    Tile getN() {
         return n;
     }
 
-    public Tile getNe() {
+    Tile getNe() {
         return ne;
     }
 
-    public Tile getW() {
+    Tile getW() {
         return w;
     }
 
-    public Tile getE() {
+    Tile getE() {
         return e;
     }
 
-    public Tile getSw() {
+    Tile getSw() {
         return sw;
     }
 
-    public Tile getS() {
+    Tile getS() {
         return s;
     }
 
-    public Tile getSe() {
+    Tile getSe() {
         return se;
     }
 
-    public String getBoardEdge() {
+    String getBoardEdge() {
         return boardEdge;
     }
 
-    public boolean isUpdated() {
+    boolean isUpdated() {
         return updated;
     }
 
     //Setters
-    public void setAlive(boolean alive) {
+    void setAlive(boolean alive) {
         isAlive = alive;
     }
 
-    public void setWillSurvive(boolean willSurvive) {
+    void setWillSurvive(boolean willSurvive) {
         this.willSurvive = willSurvive;
     }
 
-    public void setNw(Tile nw) {
+    void setNw(Tile nw) {
         this.nw = nw;
     }
 
-    public void setN(Tile n) {
+    void setN(Tile n) {
         this.n = n;
     }
 
-    public void setNe(Tile ne) {
+    void setNe(Tile ne) {
         this.ne = ne;
     }
 
-    public void setW(Tile w) {
+    void setW(Tile w) {
         this.w = w;
     }
 
-    public void setE(Tile e) {
+    void setE(Tile e) {
         this.e = e;
     }
 
-    public void setSw(Tile sw) {
+    void setSw(Tile sw) {
         this.sw = sw;
     }
 
-    public void setS(Tile s) {
+    void setS(Tile s) {
         this.s = s;
     }
 
-    public void setSe(Tile se) {
+    void setSe(Tile se) {
         this.se = se;
     }
 
-    public void setBoardEdge(String boardEdge) {
+    void setBoardEdge(String boardEdge) {
         this.boardEdge = boardEdge;
     }
 
-    public void setUpdated(boolean updated) {
+    void setUpdated(boolean updated) {
         this.updated = updated;
     }
 }
